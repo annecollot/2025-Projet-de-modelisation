@@ -1,0 +1,35 @@
+### Choisir le fichier dans lequel sont les données et où vous pouvez sauvegarder
+setwd("C:/.Louison/1A/Projet de Modélisation")
+
+#### Chargement des packages
+library(ggplot2)
+library(dplyr)
+
+### Chargement des données 
+data<-read.csv2('DatasetIndiv_ProjetModelisation.csv',h=T,dec = ",",na.strings = "NA",fileEncoding='latin1',check.names=F)	# les comptages brutes
+
+### Explorer jeu de données
+str(data) # structure
+summary(data)
+
+### Sauvegarder des données sous csv.   
+write.csv2(Result$summaries,  'ModelGR_ABL_New_rBiefs.csv')
+
+### Ouvrir la page d'aide pour une fonction donnée
+#?write.csv2 # ex pour write.csv2
+glimpse(data)
+
+### Supprimer la colonne "taille (cm)"
+data <- data %>% select(-`taille (cm)`)
+
+### Regrouper les données et compter le nombre d'individus par groupe
+data_grouped <- data %>%
+  group_by(cespece, Secteur, NumStation, Localisation, Year) %>%
+  summarise(Abondance = n(), .groups = "drop")  # summarise() crée un résumé des données groupées par group_by() / n() est une fonction de dplyr qui compte le nombre de lignes dans chaque groupe défini par group_by() / .groups="drop" indique qu'on veut supprimer cette structure de groupement après le summarise()
+
+### Sauvegarder le fichier transformé
+write.csv(data_grouped, "DatasetIndiv_Transformed.csv", row.names = FALSE)
+
+### Afficher un aperçu du résultat
+View(data_grouped)
+glimpse(data_grouped)
