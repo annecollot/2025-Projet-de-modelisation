@@ -1,0 +1,48 @@
+setwd("C:/.Louison/1A/Projet de Modélisation")
+
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(tidyr)
+library(readr)
+
+# Charger le fichier
+data <- read.csv2("DatasetIndiv_Final.csv", fileEncoding = "latin1")
+
+# Supprimer la colonne abondance_relative si elle existe
+if ("abondance_relative" %in% colnames(data)) {
+  data <- data %>% select(-abondance_relative)
+}
+
+# Créer la colonne "lieu" selon les conditions
+data <- data %>%
+  mutate(lieu = case_when(
+    Localisation == "Chenal principal" & Secteur == 1 ~ 1,
+    Localisation == "Chenal principal" & Secteur == 2 ~ 2,
+    Localisation == "Annexe secondaire" & Secteur == 1 ~ 3,
+    TRUE ~ NA_real_  # Laisse NA pour les autres cas, si besoin
+  ))
+
+# Vérifier qu'on n'a pas de NA dans lieu avant d'aller plus loin
+data <- data %>% filter(!is.na(lieu))
+
+# Regrouper par année, lieu et espèce et sommer les abondances
+data_grouped <- data %>%
+  group_by(Year, lieu, cespece) %>%
+  summarise(abondance = sum(abondance), .groups = "drop")
+
+# Calcul des abondances relatives en %
+data_grouped <- data_grouped %>%
+  group_by(Year, lieu) %>%
+  mutate(abondance_relative = 100 * abondance / sum(abondance)) %>%
+  ungroup()
+
+# Réorganiser le tableau : colonnes = espèces
+data_finale <- data_grouped %>%
+  select(Year, lieu, cespece, abondance_relative) %>%
+  pivot_wider(names_from = cespece, values_from = abondance_relative, values_fill = 0)
+
+# Aperçu
+View(data_finale)
+
+# Sauvegarder dans un nouveau fichier CSV
+write.csv2(data_finale, "Dataset_ACP_Abondances_Relatives_Par_Annee_Lieu.csv", row.names = FALSE)
