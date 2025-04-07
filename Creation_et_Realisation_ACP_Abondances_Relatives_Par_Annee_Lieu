@@ -1,4 +1,4 @@
-setwd("C:/.Louison/1A/Projet de Modélisation")
+ue les setwd("C:/.Louison/1A/Projet de Modélisation")
 
 # Charger les bibliothèques nécessaires
 library(dplyr)
@@ -41,7 +41,7 @@ data_finale <- data_grouped %>%
   select(Year, lieu, cespece, abondance_relative) %>%
   pivot_wider(names_from = cespece, values_from = abondance_relative, values_fill = 0)
 
-# Supposons que ton tableau final s'appelle `table_finale`
+# On garde que les 10 espèces les plus abondantes
 colonnes_a_supprimer <- c("TAC", "LOT", "OBR", "TOX", "LPP", "BBG", "CAG", "IDE", "BRX", "CAD", "CMI", "MIS", "BLN", "BRB", "BRO", "EPI", "GRE", "PER", "TRF", "BLE", "BRE", "CHA", "LOF", "PES", "TAN", "ANG", "PCH", "ROT", "SAN", "PSR", "CCO", "SIL")
 
 # Supprimer les colonnes si elles existent
