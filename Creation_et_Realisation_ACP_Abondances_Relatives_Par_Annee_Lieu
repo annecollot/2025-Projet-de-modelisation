@@ -41,8 +41,17 @@ data_finale <- data_grouped %>%
   select(Year, lieu, cespece, abondance_relative) %>%
   pivot_wider(names_from = cespece, values_from = abondance_relative, values_fill = 0)
 
+# Supposons que ton tableau final s'appelle `table_finale`
+colonnes_a_supprimer <- c("TAC", "LOT", "OBR", "TOX", "LPP", "BBG", "CAG", "IDE", "BRX", "CAD", "CMI", "MIS", "BLN", "BRB", "BRO", "EPI", "GRE", "PER", "TRF", "BLE", "BRE", "CHA", "LOF", "PES", "TAN", "ANG", "PCH", "ROT", "SAN", "PSR", "CCO", "SIL")
+
+# Supprimer les colonnes si elles existent
+data_finale <- data_finale %>% select(-any_of(colonnes_a_supprimer))
+
 # Aperçu
 View(data_finale)
 
 # Sauvegarder dans un nouveau fichier CSV
-write.csv2(data_finale, "Dataset_ACP_Abondances_Relatives_Par_Annee_Lieu.csv", row.names = FALSE)
+write.csv2(data_finale, "Dataset_Abondances_Relatives_Par_Annee_Lieu.csv", row.names = FALSE)
+
+res.pcae <- PCA(data_finale, scale.unit=T, quali.sup=2, graph=T)
+plot(res.pcae, habillage=2, cex=0.6)
