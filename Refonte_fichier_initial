@@ -20,7 +20,7 @@ data <- data %>% select(-`taille (cm)`)
 ### Regrouper les données et compter le nombre d'individus par groupe
 data_grouped <- data %>%
   group_by(cespece, Secteur, NumStation, Localisation, Year) %>%
-  summarise(Abondance = n(), .groups = "drop")  # summarise() crée un résumé des données groupées par group_by() / n() est une fonction de dplyr qui compte le nombre de lignes dans chaque groupe défini par group_by() / .groups="drop" indique qu'on veut supprimer cette structure de groupement après le summarise()
+  summarise(abondance=n(), .groups = "drop")  # summarise() crée un résumé des données groupées par group_by() / n() est une fonction de dplyr qui compte le nombre de lignes dans chaque groupe défini par group_by() / .groups="drop" indique qu'on veut supprimer cette structure de groupement après le summarise()
 
 ### Sauvegarder le fichier transformé
 write.csv(data_grouped, "DatasetIndiv_Transformed.csv", row.names = FALSE)
@@ -34,11 +34,12 @@ NbPoints_Par_Station_Annee <- data %>%
 data_grouped <- data_grouped %>%
   right_join(NbPoints_Par_Station_Annee, by = c("NumStation", "Year"))
 
+## Ajout de la colonne des abondances relatives
+data_grouped <- data_grouped %>%
+  mutate(abondance_relative = abondance / Nb_points_Total)
+
 ### Sauvegarder le fichier final avec la nouvelle colonne
 write.csv2(data_grouped, "DatasetIndiv_Final.csv", row.names = FALSE)
-
-## Ajout de la colonne des abondances relatives
-mutate(data,abondance_relative=Abondance/Nb_points_Total)
 
 ### Aperçu du résultat final
 View(data_grouped)
