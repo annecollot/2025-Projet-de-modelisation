@@ -1,4 +1,4 @@
-ue les setwd("C:/.Louison/1A/Projet de Modélisation")
+setwd("C:/.Louison/1A/Projet de Modélisation")
 
 # Charger les bibliothèques nécessaires
 library(dplyr)
