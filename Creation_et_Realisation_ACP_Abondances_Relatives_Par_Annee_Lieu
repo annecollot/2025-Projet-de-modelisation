@@ -43,7 +43,7 @@ data_finale <- data_grouped %>%
   select(Year, lieu, cespece, abondance_relative) %>%
   pivot_wider(names_from = cespece, values_from = abondance_relative, values_fill = 0)
 
-# On garde que les 10 espèces les plus abondantes
+# On garde que les 10 espèces les plus abondantes (à l'origine on avait garder HOT, GAR et ABL mais ces espèces contribuaient trop peu par rapport aux sept autres on les a donc écartées)
 colonnes_a_supprimer <- c("HOT", "GAR", "ABL", "TAC", "LOT", "OBR", "TOX", "LPP", "BBG", "CAG", "IDE", "BRX", "CAD", "CMI", "MIS", "BLN", "BRB", "BRO", "EPI", "GRE", "PER", "TRF", "BLE", "BRE", "CHA", "LOF", "PES", "TAN", "ANG", "PCH", "ROT", "SAN", "VAN", "CCO", "SIL")
 
 # Supprimer les colonnes si elles existent
@@ -68,13 +68,15 @@ View(data_acp)
 # Lancer l'ACP
 res.pca <- PCA(data_acp, quali.sup = c(ncol(data_acp) - 1, ncol(data_acp)), graph = FALSE)
 
+# Graphe des individus avec un habillage selon le lieu et les ellipses
 fviz_pca_ind(res.pca,
              label = "none",
              habillage = "lieu",
-             addEllipses = TRUE,
+             addEllipses = TRUE
              repel = TRUE) +
   ggplot2::geom_text(aes(label = etiquettes), vjust = -0.5, check_overlap = TRUE)
 
+# Graphe des variables avec un gradient de couleurs en fonction de la contribution de la variable
 fviz_pca_var(res.pca,
              col.var = "contrib",   # couleur selon la contribution
              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),  # palette
