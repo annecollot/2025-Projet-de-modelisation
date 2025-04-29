@@ -4,6 +4,8 @@ setwd("C:/.Louison/1A/Projet de Modélisation")
 library(dplyr)
 library(tidyr)
 library(readr)
+library(FactoMineR)
+library(factoextra)
 
 # Charger le fichier
 data <- read.csv2("DatasetIndiv_Final.csv", fileEncoding = "latin1")
@@ -42,16 +44,38 @@ data_finale <- data_grouped %>%
   pivot_wider(names_from = cespece, values_from = abondance_relative, values_fill = 0)
 
 # On garde que les 10 espèces les plus abondantes
-colonnes_a_supprimer <- c("TAC", "LOT", "OBR", "TOX", "LPP", "BBG", "CAG", "IDE", "BRX", "CAD", "CMI", "MIS", "BLN", "BRB", "BRO", "EPI", "GRE", "PER", "TRF", "BLE", "BRE", "CHA", "LOF", "PES", "TAN", "ANG", "PCH", "ROT", "SAN", "PSR", "CCO", "SIL")
+colonnes_a_supprimer <- c("HOT", "GAR", "ABL", "TAC", "LOT", "OBR", "TOX", "LPP", "BBG", "CAG", "IDE", "BRX", "CAD", "CMI", "MIS", "BLN", "BRB", "BRO", "EPI", "GRE", "PER", "TRF", "BLE", "BRE", "CHA", "LOF", "PES", "TAN", "ANG", "PCH", "ROT", "SAN", "VAN", "CCO", "SIL")
 
 # Supprimer les colonnes si elles existent
 data_finale <- data_finale %>% select(-any_of(colonnes_a_supprimer))
 
-# Aperçu
-View(data_finale)
+# Créer la colonne concaténée
+data_finale$annee_lieu <- paste(data_finale$Year, data_finale$lieu, sep="_")
 
-# Sauvegarder dans un nouveau fichier CSV
-write.csv2(data_finale, "Dataset_Abondances_Relatives_Par_Annee_Lieu.csv", row.names = FALSE)
+# Réorganiser les colonnes pour que 'indiv' soit au début
+data_finale <- data_finale[, c("annee_lieu", setdiff(names(data_finale), "data_finale"))]
 
-res.pcae <- PCA(data_finale, scale.unit=T, quali.sup=2, graph=T)
-plot(res.pcae, habillage=2, cex=0.6)
+# Séparer les colonnes
+vars_quali <- data_finale[, c("Year", "lieu")]
+etiquettes <- data_finale$annee_lieu
+vars_quanti <- data_finale[, !(names(data_finale) %in% c("Year", "lieu", "annee_lieu"))]
+
+# Fusionner pour passer à PCA
+data_acp <- cbind(vars_quanti, vars_quali)
+
+View(data_acp)
+
+# Lancer l'ACP
+res.pca <- PCA(data_acp, quali.sup = c(ncol(data_acp) - 1, ncol(data_acp)), graph = FALSE)
+
+fviz_pca_ind(res.pca,
+             label = "none",
+             habillage = "lieu",
+             addEllipses = TRUE,
+             repel = TRUE) +
+  ggplot2::geom_text(aes(label = etiquettes), vjust = -0.5, check_overlap = TRUE)
+
+fviz_pca_var(res.pca,
+             col.var = "contrib",   # couleur selon la contribution
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),  # palette
+             repel = TRUE)          # éviter que les noms se chevauchent
